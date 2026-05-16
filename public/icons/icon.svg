@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0a0e1a"/>
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#1a2a5e" stroke-width="2"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#1a2a5e" stroke-width="1.5"/>
+  <circle cx="256" cy="256" r="100" fill="none" stroke="#1a2a5e" stroke-width="1.5"/>
+  <!-- Galaxy spiral hint -->
+  <ellipse cx="256" cy="256" rx="120" ry="50" fill="none" stroke="#2a3a7e" stroke-width="1" transform="rotate(-25 256 256)"/>
+  <!-- Center glow -->
+  <circle cx="256" cy="256" r="30" fill="#4a7af0" opacity="0.3"/>
+  <circle cx="256" cy="256" r="18" fill="#4a7af0" opacity="0.6"/>
+  <circle cx="256" cy="256" r="10" fill="#ffffff"/>
+  <!-- Stars -->
+  <circle cx="380" cy="140" r="6" fill="#c8d8ff" opacity="0.9"/>
+  <circle cx="140" cy="360" r="4" fill="#c8d8ff" opacity="0.7"/>
+  <circle cx="400" cy="340" r="3" fill="#c8d8ff" opacity="0.6"/>
+  <circle cx="120" cy="160" r="3" fill="#4a7af0" opacity="0.8"/>
+  <circle cx="340" cy="420" r="3" fill="#c8d8ff" opacity="0.5"/>
+  <circle cx="170" cy="100" r="2" fill="#c8d8ff" opacity="0.6"/>
+  <circle cx="430" cy="240" r="2" fill="#c8d8ff" opacity="0.5"/>
+  <circle cx="90" cy="280" r="2" fill="#4a7af0" opacity="0.6"/>
+  <!-- Telescope reticle lines -->
+  <line x1="256" y1="100" x2="256" y2="155" stroke="#4a7af0" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="256" y1="357" x2="256" y2="412" stroke="#4a7af0" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="100" y1="256" x2="155" y2="256" stroke="#4a7af0" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="357" y1="256" x2="412" y2="256" stroke="#4a7af0" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>
