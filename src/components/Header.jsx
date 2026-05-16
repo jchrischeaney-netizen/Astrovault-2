@@ -24,8 +24,11 @@ export default function Header({ tab, onTabChange, count }) {
         <button className={`tab-btn ${tab === 'gallery' ? 'active' : ''}`} onClick={() => onTabChange('gallery')}>
           Gallery {count > 0 && `(${count})`}
         </button>
+        <button className={`tab-btn ${tab === 'stats' ? 'active' : ''}`} onClick={() => onTabChange('stats')}>
+          Tracker
+        </button>
         <button className={`tab-btn ${tab === 'add' ? 'active' : ''}`} onClick={() => onTabChange('add')}>
-          + Add Observation
+          + Add
         </button>
       </div>
     </header>

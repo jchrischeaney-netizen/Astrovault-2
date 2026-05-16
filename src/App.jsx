@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import Header from './components/Header.jsx'
 import Gallery from './components/Gallery.jsx'
 import ObservationForm from './components/ObservationForm.jsx'
-import ImageModal from './components/ImageModal.jsx'
+import Lightbox from './components/Lightbox.jsx'
+import Stats from './components/Stats.jsx'
 
 export default function App() {
   const [tab, setTab] = useState('gallery')
   const [observations, setObservations] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedObs, setSelectedObs] = useState(null)
+  const [lightbox, setLightbox] = useState(null) // { list, idx }
 
   const fetchObservations = useCallback(async () => {
     try {
@@ -32,7 +33,11 @@ export default function App() {
     if (!confirm('Delete this observation?')) return
     await fetch(`/api/observations/${id}`, { method: 'DELETE' })
     setObservations(prev => prev.filter(o => o.id !== id))
-    if (selectedObs?.id === id) setSelectedObs(null)
+  }
+
+  // Gallery passes (obs, filteredList, index) so lightbox navigates the visible set
+  const handleSelect = (obs, filteredList, idx) => {
+    setLightbox({ list: filteredList, idx })
   }
 
   return (
@@ -47,7 +52,7 @@ export default function App() {
           <Gallery
             observations={observations}
             loading={loading}
-            onSelect={setSelectedObs}
+            onSelect={handleSelect}
             onDelete={handleDelete}
             onAddNew={() => setTab('add')}
           />
@@ -55,12 +60,26 @@ export default function App() {
         {tab === 'add' && (
           <ObservationForm onSaved={handleSaved} onCancel={() => setTab('gallery')} />
         )}
+        {tab === 'stats' && (
+          <Stats observations={observations} />
+        )}
       </main>
-      {selectedObs && (
-        <ImageModal
-          observation={selectedObs}
-          onClose={() => setSelectedObs(null)}
-          onDelete={handleDelete}
+
+      {lightbox && (
+        <Lightbox
+          list={lightbox.list}
+          startIndex={lightbox.idx}
+          onClose={() => setLightbox(null)}
+          onDelete={(id) => {
+            handleDelete(id)
+            setLightbox(lb => {
+              if (!lb) return null
+              const newList = lb.list.filter(o => o.id !== id)
+              if (newList.length === 0) return null
+              const newIdx = Math.min(lb.idx, newList.length - 1)
+              return { list: newList, idx: newIdx }
+            })
+          }}
         />
       )}
     </div>
