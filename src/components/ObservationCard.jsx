@@ -1,6 +1,6 @@
 function formatDate(dateStr) {
   if (!dateStr) return ''
-  const d = new Date(dateStr + 'T00:00:00')
+  const d = new Date(String(dateStr).slice(0, 10) + 'T00:00:00')
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
