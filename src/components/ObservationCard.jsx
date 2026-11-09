@@ -1,3 +1,5 @@
+import { getCommonName } from '../data/celestialObjects.js'
+
 function formatDate(dateStr) {
   if (!dateStr) return ''
   const d = new Date(String(dateStr).slice(0, 10) + 'T00:00:00')
@@ -5,6 +7,7 @@ function formatDate(dateStr) {
 }
 
 export default function ObservationCard({ observation: obs, onClick, onDelete }) {
+  const commonName = getCommonName(obs.object_name)
   const imageUrl = obs.image_key ? `/api/image?key=${encodeURIComponent(obs.image_key)}` : null
 
   const handleDelete = (e) => {
@@ -21,7 +24,7 @@ export default function ObservationCard({ observation: obs, onClick, onDelete })
       )}
       <div className="obs-card-body">
         <div className="obs-card-object">{obs.object_name}</div>
-        {obs.object_type && <div className="obs-card-common">{obs.object_type}</div>}
+        {commonName && <div className="obs-card-common">{commonName}</div>}
         <div className="obs-card-meta">
           <span className="obs-badge category">{obs.object_category}</span>
           {obs.object_type && <span className="obs-badge">{obs.object_type}</span>}

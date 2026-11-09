@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import ObservationCard from './ObservationCard.jsx'
-import { CATEGORIES } from '../data/celestialObjects.js'
+import { CATEGORIES, getCommonName } from '../data/celestialObjects.js'
 
 const ALL_TYPES = [
   'Spiral Galaxy', 'Barred Spiral Galaxy', 'Elliptical Galaxy', 'Lenticular Galaxy',
@@ -29,6 +29,7 @@ export default function Gallery({ observations, loading, onSelect, onDelete, onA
       if (q) {
         return (
           o.object_name.toLowerCase().includes(q) ||
+          (getCommonName(o.object_name) || '').toLowerCase().includes(q) ||
           (o.object_type && o.object_type.toLowerCase().includes(q)) ||
           (o.notes && o.notes.toLowerCase().includes(q))
         )

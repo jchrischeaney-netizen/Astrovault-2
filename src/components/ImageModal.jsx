@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { getCommonName } from '../data/celestialObjects.js'
 
 function formatDate(dateStr) {
   if (!dateStr) return '—'
@@ -7,6 +8,7 @@ function formatDate(dateStr) {
 }
 
 export default function ImageModal({ observation: obs, onClose, onDelete }) {
+  const commonName = getCommonName(obs.object_name)
   const imageUrl = obs.image_key ? `/api/image?key=${encodeURIComponent(obs.image_key)}` : null
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function ImageModal({ observation: obs, onClose, onDelete }) {
         <div className="modal-header">
           <div>
             <div className="modal-title">{obs.object_name}</div>
+            {commonName && <div className="modal-common">{commonName}</div>}
             <div className="modal-subtitle">{obs.object_category} · {obs.object_type || 'Deep Sky Object'}</div>
           </div>
           <button className="modal-close" onClick={onClose}>✕</button>
@@ -57,7 +60,7 @@ export default function ImageModal({ observation: obs, onClose, onDelete }) {
           <div className="modal-details">
             <div className="modal-detail-item">
               <div className="modal-detail-label">Object</div>
-              <div className="modal-detail-value">{obs.object_name}</div>
+              <div className="modal-detail-value">{obs.object_name}{commonName && ` – ${commonName}`}</div>
             </div>
             <div className="modal-detail-item">
               <div className="modal-detail-label">Category</div>
