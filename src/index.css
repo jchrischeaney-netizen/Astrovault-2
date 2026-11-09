@@ -284,6 +284,7 @@ html, body, #root {
   flex-shrink: 0;
 }
 .modal-title { font-size: 1.15rem; font-weight: 600; color: var(--star); }
+.modal-common { font-size: 0.95rem; color: var(--text-secondary); margin-top: 2px; }
 .modal-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
 .modal-close {
   background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -361,6 +362,10 @@ html, body, #root {
 }
 .lightbox-object {
   font-size: 1rem; font-weight: 600; color: var(--star); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.lightbox-common {
+  font-size: 0.9rem; color: var(--text-secondary); white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
 .lightbox-type {

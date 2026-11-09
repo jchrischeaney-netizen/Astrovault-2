@@ -220,3 +220,11 @@ export function getAllObjects() {
     ...NGC.map(o => ({ ...o, category: CATEGORIES.NGC })),
   ]
 }
+
+const COMMON_NAMES = new Map(
+  [...MESSIER, ...NGC].filter(o => o.common).map(o => [o.name, o.common])
+)
+
+export function getCommonName(name) {
+  return name ? COMMON_NAMES.get(name) || null : null
+}

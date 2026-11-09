@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { getCommonName } from '../data/celestialObjects.js'
 
 export default function Lightbox({ list, startIndex, onClose, onDelete }) {
   const [idx, setIdx] = useState(startIndex)
@@ -8,6 +9,7 @@ export default function Lightbox({ list, startIndex, onClose, onDelete }) {
   const touchStartY = useRef(null)
 
   const obs = list[idx]
+  const commonName = getCommonName(obs?.object_name)
   const imageUrl = obs?.image_key ? `/api/image?key=${encodeURIComponent(obs.image_key)}` : null
   const hasPrev = idx > 0
   const hasNext = idx < list.length - 1
@@ -74,6 +76,7 @@ export default function Lightbox({ list, startIndex, onClose, onDelete }) {
         <div className="lightbox-counter">{idx + 1} / {list.length}</div>
         <div className="lightbox-name">
           <span className="lightbox-object">{obs.object_name}</span>
+          {commonName && <span className="lightbox-common">{commonName}</span>}
           {obs.object_type && <span className="lightbox-type">{obs.object_type}</span>}
         </div>
         <button className="lightbox-close" onClick={onClose}>✕</button>
@@ -86,7 +89,7 @@ export default function Lightbox({ list, startIndex, onClose, onDelete }) {
             key={fadeKey}
             className={`lightbox-img ${imageLoaded ? 'loaded' : ''}`}
             src={imageUrl}
-            alt={obs.object_name}
+            alt={commonName ? `${obs.object_name} – ${commonName}` : obs.object_name}
             onLoad={() => setImageLoaded(true)}
           />
         ) : (
