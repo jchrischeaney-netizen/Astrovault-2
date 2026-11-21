@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { getAllObjects, getObjectLabel, CATEGORIES } from '../data/celestialObjects.js'
+import { getAllObjects, getObjectLabel, CATEGORIES, OBJECT_TYPES } from '../data/celestialObjects.js'
 
 const ALL_OBJECTS = getAllObjects()
 
@@ -7,6 +7,7 @@ const INITIAL = {
   category: '',
   objectSearch: '',
   selectedObject: null,
+  customType: '',
   capture_date: new Date().toISOString().slice(0, 10),
   integration_time: '',
   telescope: '',
@@ -27,6 +28,14 @@ export default function ObservationForm({ onSaved, onCancel }) {
   const [dropdownIdx, setDropdownIdx] = useState(0)
   const dropdownRef = useRef(null)
   const inputRef = useRef(null)
+
+  const typedName = form.objectSearch.trim()
+  const exactMatch = typedName
+    ? ALL_OBJECTS.find(o =>
+        o.name.toLowerCase() === typedName.toLowerCase() ||
+        getObjectLabel(o).toLowerCase() === typedName.toLowerCase())
+    : null
+  const showCustomOption = typedName && !exactMatch && !form.selectedObject
 
   const filteredObjects = (() => {
     const q = form.objectSearch.trim().toLowerCase()
@@ -55,6 +64,16 @@ export default function ObservationForm({ onSaved, onCancel }) {
     return () => document.removeEventListener('mousedown', close)
   }, [])
 
+  const selectCustom = () => {
+    if (!typedName) return
+    setForm(f => ({
+      ...f,
+      selectedObject: { name: typedName, category: CATEGORIES.OTHER, type: '', custom: true },
+      objectSearch: typedName,
+    }))
+    setDropdownOpen(false)
+  }
+
   const selectObject = (obj) => {
     setForm(f => ({
       ...f,
@@ -67,9 +86,13 @@ export default function ObservationForm({ onSaved, onCancel }) {
 
   const handleSearchKey = (e) => {
     if (!dropdownOpen) { setDropdownOpen(true); setDropdownIdx(0); return }
-    if (e.key === 'ArrowDown') { e.preventDefault(); setDropdownIdx(i => Math.min(i + 1, filteredObjects.length - 1)) }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setDropdownIdx(i => Math.min(i + 1, filteredObjects.length - (showCustomOption ? 0 : 1))) }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setDropdownIdx(i => Math.max(i - 1, 0)) }
-    else if (e.key === 'Enter') { e.preventDefault(); if (filteredObjects[dropdownIdx]) selectObject(filteredObjects[dropdownIdx]) }
+    else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (filteredObjects[dropdownIdx]) selectObject(filteredObjects[dropdownIdx])
+      else if (showCustomOption) selectCustom()
+    }
     else if (e.key === 'Escape') setDropdownOpen(false)
   }
 
@@ -95,7 +118,12 @@ export default function ObservationForm({ onSaved, onCancel }) {
     e.preventDefault()
     setError('')
 
-    if (!form.selectedObject) { setError('Please select a celestial object.'); return }
+    // Typed a name but didn't pick from the list: use the catalog match if
+    // there is one, otherwise save it as a custom object.
+    let obj = form.selectedObject
+    if (!obj && exactMatch) obj = exactMatch
+    if (!obj && typedName) obj = { name: typedName, category: CATEGORIES.OTHER, type: '', custom: true }
+    if (!obj) { setError('Please select a celestial object or type its name.'); return }
     if (!form.capture_date) { setError('Please enter the capture date.'); return }
 
     setUploading(true)
@@ -129,14 +157,14 @@ export default function ObservationForm({ onSaved, onCancel }) {
 
       setProgress(80)
 
-      const obj = form.selectedObject
+      const objectType = obj.custom ? (form.customType.trim() || null) : obj.type
       const res = await fetch('/api/observations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           object_name: obj.name,
           object_category: obj.category,
-          object_type: obj.type,
+          object_type: objectType,
           capture_date: form.capture_date,
           integration_time: form.integration_time || null,
           telescope: form.telescope || null,
@@ -193,7 +221,7 @@ export default function ObservationForm({ onSaved, onCancel }) {
             <input
               ref={inputRef}
               className="form-input"
-              placeholder="Search: M42, Orion, NGC 7000…"
+              placeholder="Search: M42, Orion, IC 1805… or type any name"
               value={form.objectSearch}
               onChange={e => {
                 setForm(f => ({ ...f, objectSearch: e.target.value, selectedObject: null }))
@@ -207,7 +235,7 @@ export default function ObservationForm({ onSaved, onCancel }) {
             {dropdownOpen && (
               <div className="object-dropdown" ref={dropdownRef}>
                 {filteredObjects.length === 0 ? (
-                  <div className="object-no-results">No objects found</div>
+                  !showCustomOption && <div className="object-no-results">No objects found</div>
                 ) : filteredObjects.map((obj, i) => (
                   <div
                     key={`${obj.category}-${obj.name}`}
@@ -219,10 +247,38 @@ export default function ObservationForm({ onSaved, onCancel }) {
                     <div className="object-option-sub">{obj.category} · {obj.type}</div>
                   </div>
                 ))}
+                {showCustomOption && (
+                  <div
+                    className={`object-option object-option-custom ${dropdownIdx === filteredObjects.length ? 'active' : ''}`}
+                    onMouseDown={selectCustom}
+                    onMouseEnter={() => setDropdownIdx(filteredObjects.length)}
+                  >
+                    <div className="object-option-name">+ Use “{typedName}”</div>
+                    <div className="object-option-sub">Not in the list? Save it as a custom object</div>
+                  </div>
+                )}
               </div>
             )}
           </div>
+          <div className="form-hint">Can't find it? Type any name, e.g. “Sh2-115” or “Comet C/2023 A3”.</div>
         </div>
+
+        {/* Type for custom objects */}
+        {(form.selectedObject?.custom || showCustomOption) && (
+          <div className="form-group">
+            <label className="form-label">Object Type</label>
+            <input
+              className="form-input"
+              list="object-type-options"
+              placeholder="e.g. Emission Nebula, Comet…"
+              value={form.customType}
+              onChange={e => setForm(f => ({ ...f, customType: e.target.value }))}
+            />
+            <datalist id="object-type-options">
+              {OBJECT_TYPES.map(t => <option key={t} value={t} />)}
+            </datalist>
+          </div>
+        )}
 
         {/* Date */}
         <div className="form-group">
