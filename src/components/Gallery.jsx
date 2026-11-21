@@ -1,15 +1,6 @@
 import { useState, useMemo } from 'react'
 import ObservationCard from './ObservationCard.jsx'
-import { CATEGORIES, getCommonName } from '../data/celestialObjects.js'
-
-const ALL_TYPES = [
-  'Spiral Galaxy', 'Barred Spiral Galaxy', 'Elliptical Galaxy', 'Lenticular Galaxy',
-  'Irregular Galaxy', 'Dwarf Elliptical Galaxy', 'Radio Galaxy', 'Seyfert Galaxy',
-  'Globular Cluster', 'Open Cluster', 'Planetary Nebula', 'Emission Nebula',
-  'Reflection Nebula', 'Supernova Remnant', 'Star Cloud', 'Asterism',
-  'Planet', 'Dwarf Planet', 'Natural Satellite', 'Moon of Jupiter',
-  'Moon of Saturn', 'Asteroid', 'Comet', 'Star',
-]
+import { CATEGORIES, OBJECT_TYPES, getCommonName } from '../data/celestialObjects.js'
 
 export default function Gallery({ observations, loading, onSelect, onDelete, onAddNew }) {
   const [search, setSearch] = useState('')
@@ -18,7 +9,9 @@ export default function Gallery({ observations, loading, onSelect, onDelete, onA
 
   const presentTypes = useMemo(() => {
     const types = new Set(observations.map(o => o.object_type).filter(Boolean))
-    return ALL_TYPES.filter(t => types.has(t))
+    const known = OBJECT_TYPES.filter(t => types.has(t))
+    const custom = [...types].filter(t => !OBJECT_TYPES.includes(t)).sort()
+    return [...known, ...custom]
   }, [observations])
 
   const filtered = useMemo(() => {

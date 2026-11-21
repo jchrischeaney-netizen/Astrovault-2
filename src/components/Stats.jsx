@@ -1,9 +1,17 @@
 import { useState, useMemo } from 'react'
-import { MESSIER, NGC, SOLAR_SYSTEM, CATEGORIES, getObjectLabel } from '../data/celestialObjects.js'
+import { MESSIER, NGC, IC, OTHER, SOLAR_SYSTEM, CATEGORIES, getObjectLabel } from '../data/celestialObjects.js'
 
 const MESSIER_TOTAL = MESSIER.length  // 110
 const NGC_LIST = NGC
 const SS_LIST = SOLAR_SYSTEM
+
+const CATALOG_LISTS = {
+  [CATEGORIES.MESSIER]: MESSIER,
+  [CATEGORIES.NGC]: NGC,
+  [CATEGORIES.IC]: IC,
+  [CATEGORIES.OTHER]: OTHER,
+  [CATEGORIES.SOLAR_SYSTEM]: SOLAR_SYSTEM,
+}
 
 export default function Stats({ observations }) {
   const [unimageFilter, setUnimageFilter] = useState('Messier')
@@ -26,16 +34,16 @@ export default function Stats({ observations }) {
   const imagedNGC = useMemo(() =>
     new Set(observations.filter(o => o.object_category === CATEGORIES.NGC).map(o => o.object_name)),
     [observations])
+  const imagedIC = useMemo(() =>
+    new Set(observations.filter(o => o.object_category === CATEGORIES.IC).map(o => o.object_name)),
+    [observations])
   const imagedSolar = useMemo(() =>
     new Set(observations.filter(o => o.object_category === CATEGORIES.SOLAR_SYSTEM).map(o => o.object_name)),
     [observations])
 
   // Not yet imaged
   const notImaged = useMemo(() => {
-    let list
-    if (unimageFilter === 'Messier') list = MESSIER.map(o => ({ ...o, category: CATEGORIES.MESSIER }))
-    else if (unimageFilter === 'NGC') list = NGC_LIST.map(o => ({ ...o, category: CATEGORIES.NGC }))
-    else list = SS_LIST.map(o => ({ ...o, category: CATEGORIES.SOLAR_SYSTEM }))
+    const list = CATALOG_LISTS[unimageFilter].map(o => ({ ...o, category: unimageFilter }))
 
     const filtered = list.filter(o => !imagedNames.has(o.name))
     if (typeFilter) return filtered.filter(o => o.type === typeFilter)
@@ -43,10 +51,7 @@ export default function Stats({ observations }) {
   }, [unimageFilter, typeFilter, imagedNames])
 
   const availableTypes = useMemo(() => {
-    let list
-    if (unimageFilter === 'Messier') list = MESSIER
-    else if (unimageFilter === 'NGC') list = NGC_LIST
-    else list = SS_LIST
+    const list = CATALOG_LISTS[unimageFilter]
     return [...new Set(list.map(o => o.type))].sort()
   }, [unimageFilter])
 
@@ -79,6 +84,14 @@ export default function Stats({ observations }) {
             <div className="stats-progress-fill" style={{ width: `${(imagedNGC.size / NGC_LIST.length) * 100}%` }} />
           </div>
           <div className="stats-card-pct">{Math.round((imagedNGC.size / NGC_LIST.length) * 100)}% complete</div>
+        </div>
+        <div className="stats-card">
+          <div className="stats-card-value">{imagedIC.size}<span className="stats-card-denom">/{IC.length}</span></div>
+          <div className="stats-card-label">IC Objects</div>
+          <div className="stats-progress">
+            <div className="stats-progress-fill" style={{ width: `${(imagedIC.size / IC.length) * 100}%` }} />
+          </div>
+          <div className="stats-card-pct">{Math.round((imagedIC.size / IC.length) * 100)}% complete</div>
         </div>
         <div className="stats-card">
           <div className="stats-card-value">{imagedSolar.size}<span className="stats-card-denom">/{SS_LIST.length}</span></div>
@@ -115,7 +128,7 @@ export default function Stats({ observations }) {
         <h2 className="stats-section-title">Not Yet Imaged</h2>
         <div className="unimaged-controls">
           <div className="filter-pills">
-            {['Messier', 'NGC', 'Solar System'].map(cat => (
+            {Object.keys(CATALOG_LISTS).map(cat => (
               <button
                 key={cat}
                 className={`filter-pill ${unimageFilter === cat ? 'active' : ''}`}

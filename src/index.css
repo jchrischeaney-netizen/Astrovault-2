@@ -196,6 +196,8 @@ html, body, #root {
 .object-option:hover, .object-option.active { background: var(--accent-glow); }
 .object-option-name { font-size: 0.9rem; color: var(--text-primary); }
 .object-option-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+.object-option-custom .object-option-name { color: var(--accent); }
+.form-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
 .object-no-results { padding: 14px; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
 
 /* Upload zone */
